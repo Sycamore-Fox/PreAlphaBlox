@@ -1,0 +1,189 @@
+<html>
+
+<body style="margin:0;padding:0;">
+    <canvas id="myCanvas"></canvas>
+
+    <script>
+        "use strict";
+
+        // Get page width/height
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        // Center of canvas
+        const centerx = w / 2;
+        const centery = h / 2;
+
+        //mouse location tracker
+        let mousex = 0;
+        let mousey = 0;
+
+        // Canvas setup
+        const canvas1 = document.getElementById("myCanvas");
+        canvas1.width = w;
+        canvas1.height = h;
+        const ctx = canvas1.getContext("2d");
+
+        // Grid offset and player speed, UNIVERSAL SCALE
+        let offsetx = 0;
+        let offsety = 0;
+        const speed = 5;
+        let Universalscale = 1;
+
+
+        // Track key states
+        const keys = {};
+
+        // Listen for keydown and keyup events and mouse clicks
+        window.addEventListener('keydown', (event) => {
+            keys[event.key] = true;
+        });
+
+        window.addEventListener('keyup', (event) => {
+            delete keys[event.key];
+        });
+
+
+        // Draw text in the top-left corner
+
+        //listen for mouse movement
+        canvas1.addEventListener('mousemove', (event) => {
+            //get mouse position relative to the canvas
+            const rect = canvas1.getBoundingClientRect();
+            mousex = event.clientX - rect.left;
+            mousey = event.clientY - rect.top;
+        });
+
+        //var
+        let gridlocationx = 0;
+        let gridlocationy = 0;
+
+        // Grid function
+        function Makegrass() {
+            ctx.fillStyle = "#318c30";
+            ctx.fillRect(offsetx + gridlocationx, offsety + gridlocationy, 60 * Universalscale, 60 * Universalscale)
+            ctx.strokeStyle = '#000000'
+            ctx.strokeRect(offsetx + gridlocationx, offsety + gridlocationy, 60 * Universalscale, 60 * Universalscale)
+
+        }
+        function Renderworld() {
+            for (let index = 0; index < 10; index++) {
+                gridlocationx = (index * 60) * Universalscale;
+                for (let index2 = 0; index2 < 10; index2++) {
+                    gridlocationy = (index2 * 60) * Universalscale;
+                    Makegrass()
+
+
+                }
+
+
+
+            }
+        }
+        //boolean
+        let zoomlock = 0;
+
+
+        // Game loop
+        function gameloop() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas1.width, canvas1.height);
+
+
+            // Update offset based on keys
+            if (keys['w']) {
+                offsety += speed; // Move grid down
+            }
+            if (keys['s']) {
+                offsety -= speed; // Move grid up
+            }
+            if (keys['a']) {
+                offsetx += speed; // Move grid right
+            }
+            if (keys['d']) {
+                offsetx -= speed; // Move grid left
+            }
+
+
+            //scaling/zooming
+
+            if (keys['.']) {
+                if (Universalscale < 3.0) {
+                    offsetx = offsetx - (centerx - offsetx) * 0.1 / Universalscale;
+                    offsety = offsety - (centery - offsety) * 0.1 / Universalscale;
+                    Universalscale = Universalscale + 0.1;
+                } // Universal scale up
+            }
+            if (keys[',']) {
+                if (Universalscale >= 0.81) {
+                    offsetx = offsetx + (centerx - offsetx) * 0.1 / Universalscale;
+                    offsety = offsety + (centery - offsety) * 0.1 / Universalscale;
+                    Universalscale = Universalscale - 0.1;
+                } // Universal scale down
+
+
+            }
+            //scoping in test with letter q
+            if (keys['q']) {
+                zoomlock = 1;
+            }
+            if(!keys['q']) {
+                zoomlock=0
+            }
+
+            if (zoomlock == 1) {
+                if (Universalscale <= 1.3) {
+                    offsetx = offsetx - (centerx - offsetx) * 0.05 / Universalscale;
+                    offsety = offsety - (centery - offsety) * 0.05 / Universalscale;
+                    Universalscale = Universalscale + 0.05; 
+                }
+            }
+            else{
+                if (Universalscale >= 1) {
+                    offsetx = offsetx + (centerx - offsetx) * 0.05 / Universalscale;
+                    offsety = offsety + (centery - offsety) * 0.05 / Universalscale;
+                    Universalscale = Universalscale - 0.05; 
+                }
+
+            }
+
+
+
+
+            // Draw the grid (in loop)
+            Renderworld();
+
+            //text box var
+            ctx.fillStyle = "#000000"
+            ctx.font = "20px Arial";
+            ctx.fillText("Offset X: " + offsetx, 10, 50);
+            ctx.fillText("Offset Y: " + offsety, 10, 70);
+            ctx.fillText("Gridlocationx: " + gridlocationx, 10, 90);
+            ctx.fillText("Gridlocationy: " + gridlocationx, 10, 110);
+            ctx.fillText("Universalscale: " + Universalscale, 10, 130);
+            ctx.fillText("Zoomlock: " + zoomlock, 10, 150);
+
+
+
+
+
+            // Draw the player (circle)
+            ctx.fillStyle = "#D2B48C";
+            ctx.beginPath();
+            ctx.arc(centerx, centery, 30 * Universalscale, 0, 2 * Math.PI); // Player is always at the center
+            ctx.fill();
+
+            //screendelay
+
+
+            // Request the next animation frame
+
+            requestAnimationFrame(gameloop);
+        }
+
+        // Start the game loop
+        gameloop();
+    </script>
+</body>
+
+</html>
